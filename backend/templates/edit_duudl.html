@@ -36,6 +36,20 @@
     </div>
 
     <div class="card stack">
+      <div class="row" style="justify-content: space-between; align-items: start;">
+        <div>
+          <h2 class="h1" style="font-size: 18px;">Slett Duudl</h2>
+          <p class="p">Dette sletter Duudlen, inkludert alle svar.</p>
+        </div>
+        <div>
+          <form id="deleteForm" method="post" action="{{ url_for('delete_duudl_post', token=duudl.token) }}">
+            <button class="btn btn--danger" type="submit" id="deleteBtn">Slett Duudl</button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <div class="card stack">
       <div class="row" style="justify-content: space-between;">
         <div>
           <h2 class="h1" style="font-size: 18px;">Mottatte svar</h2>

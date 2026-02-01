@@ -10,6 +10,7 @@ from backend.auth import get_selected_user, is_authed, pop_next_url, require_log
 from backend.db import (
     close_db,
     create_duudl,
+    delete_duudl,
     ensure_schema,
     fetch_duudl_state_json,
     get_duudl_by_token,
@@ -192,6 +193,16 @@ def create_app() -> Flask:
 
         update_duudl(duudl_id=duudl.id, title=title, new_days=[str(d) for d in days])
         return redirect(url_for("show_duudl", token=token))
+
+    @app.post("/d/<token>/delete")
+    @require_selected_user
+    def delete_duudl_post(token: str):
+        duudl = get_duudl_by_token(token)
+        if duudl is None:
+            return Response("Not found", status=404)
+
+        delete_duudl(duudl_id=duudl.id)
+        return redirect(url_for("overview"))
 
     @app.get("/api/duudl/<token>")
     @require_selected_user

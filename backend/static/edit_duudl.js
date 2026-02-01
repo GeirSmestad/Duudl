@@ -8,6 +8,7 @@ const selectedSummary = document.getElementById("selectedSummary");
 const selectedDaysJson = document.getElementById("selectedDaysJson");
 const clearBtn = document.getElementById("clearBtn");
 const editForm = document.getElementById("editForm");
+const deleteForm = document.getElementById("deleteForm");
 
 const gridRoot = document.getElementById("gridRoot");
 
@@ -107,6 +108,16 @@ editForm?.addEventListener("submit", (ev) => {
     )}. Fortsette?`,
     onOk: () => {
       editForm.submit();
+    },
+  });
+});
+
+deleteForm?.addEventListener("submit", (ev) => {
+  ev.preventDefault();
+  openModal({
+    text: "Er du sikker? Dette sletter Duudlen og alle svar.",
+    onOk: () => {
+      deleteForm.submit();
     },
   });
 });

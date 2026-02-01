@@ -254,6 +254,12 @@ def update_duudl(*, duudl_id: int, title: str, new_days: list[str]) -> list[str]
     return removed
 
 
+def delete_duudl(*, duudl_id: int) -> None:
+    db = get_db()
+    db.execute("DELETE FROM duudls WHERE id = ?", (duudl_id,))
+    db.commit()
+
+
 def fetch_duudl_state_json(duudl_id: int) -> dict[str, Any]:
     users = list_users()
     days = list_duudl_days(duudl_id)
