@@ -15,7 +15,7 @@ export function cellClassForValue(value) {
 export function valueSymbol(value) {
   if (value === "yes") return "✓";
   if (value === "no") return "✕";
-  if (value === "inconvenient") return "△";
+  if (value === "inconvenient") return "( ✓ )";
   return "";
 }
 

@@ -244,8 +244,8 @@ label {
 }
 
 .calendar__day--selected {
-  background: rgba(122, 162, 255, 0.18);
-  outline: 1px solid rgba(122, 162, 255, 0.35);
+  background: rgba(122, 162, 255, 0.30);
+  outline: 1px solid rgba(122, 162, 255, 0.55);
 }
 
 .gridTable {
@@ -290,20 +290,21 @@ label {
   opacity: 0.72;
 }
 
-.gridRow--me td {
-  background: rgba(110, 240, 183, 0.06);
+/* Highlight your row, but do not override explicit yes/no/inconvenient cell colors. */
+.gridRow--me td:not(.gridCell--yes):not(.gridCell--no):not(.gridCell--inconvenient) {
+  background: rgba(110, 240, 183, 0.08);
 }
 
 .gridCell--yes {
-  background: rgba(110, 240, 183, 0.18);
+  background: rgba(0, 220, 140, 0.40);
 }
 
 .gridCell--no {
-  background: rgba(255, 107, 107, 0.18);
+  background: rgba(255, 64, 64, 0.40);
 }
 
 .gridCell--inconvenient {
-  background: rgba(255, 209, 102, 0.18);
+  background: rgba(255, 242, 40, 0.7);
 }
 
 .modalBackdrop {
