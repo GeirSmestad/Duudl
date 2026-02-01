@@ -31,6 +31,15 @@ def _template_context() -> dict[str, Any]:
     }
 
 
+def _set_form_state(key: str, state: dict[str, Any]) -> None:
+    session[key] = state
+
+
+def _pop_form_state(key: str) -> dict[str, Any]:
+    state = session.pop(key, None)
+    return state if isinstance(state, dict) else {}
+
+
 def create_app() -> Flask:
     app = Flask(__name__)
     app.config["SECRET_KEY"] = "dev"
@@ -110,7 +119,14 @@ def create_app() -> Flask:
     @app.get("/duudl/new")
     @require_selected_user
     def duudl_new():
-        return render_template("duudl_new.html", title="Ny Duudl", **_template_context())
+        form_state = _pop_form_state("duudl_new_form_state")
+        return render_template(
+            "duudl_new.html",
+            title="Ny Duudl",
+            form_title=form_state.get("title", ""),
+            form_selected_days_json=form_state.get("selected_days_json", "[]"),
+            **_template_context(),
+        )
 
     @app.post("/duudl/new")
     @require_selected_user
@@ -126,10 +142,12 @@ def create_app() -> Flask:
             days = []
 
         if not title:
+            _set_form_state("duudl_new_form_state", {"title": "", "selected_days_json": days_json})
             session["flash_error"] = "Skriv inn en tittel."
             return redirect(url_for("duudl_new"))
 
         if not isinstance(days, list) or not days:
+            _set_form_state("duudl_new_form_state", {"title": title, "selected_days_json": days_json})
             session["flash_error"] = "Velg minst én dato."
             return redirect(url_for("duudl_new"))
 

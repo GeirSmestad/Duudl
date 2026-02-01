@@ -15,7 +15,7 @@
       <form id="duudlForm" method="post" action="{{ url_for('duudl_new_post') }}" class="stack">
         <div class="stack">
           <label for="title">Tittel</label>
-          <input id="title" class="input" name="title" type="text" />
+          <input id="title" class="input" name="title" type="text" value="{{ form_title or '' }}" />
         </div>
 
         <div class="stack">
@@ -25,7 +25,7 @@
             Valgte datoer:
             <span id="selectedSummary" class="pill">ingen</span>
           </div>
-          <input type="hidden" name="selected_days_json" id="selectedDaysJson" value="[]" />
+          <input type="hidden" name="selected_days_json" id="selectedDaysJson" value="{{ form_selected_days_json or '[]' }}" />
         </div>
 
         <div class="row">

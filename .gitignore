@@ -1,3 +1,10 @@
+.venv/
+__pycache__/
+*.pyc
+
+# Local SQLite DB (default path)
+data/duudl.db
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]
