@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block content %}
+  <div class="stack">
+    <div class="row" style="justify-content: space-between;">
+      <div>
+        <h1 class="h1">Rediger Duudl</h1>
+        <!-- <p class="p">Du kan endre tittel, datoer og (i denne modusen) hele svar-tabellen.</p> -->
+      </div>
+      <div class="row">
+        <a class="btn btn--ghost" href="{{ url_for('show_duudl', token=duudl.token) }}">Til Duudl</a>
+      </div>
+    </div>
+
+    <div class="card stack">
+      <form id="editForm" method="post" action="{{ url_for('edit_duudl_post', token=duudl.token) }}" class="stack">
+        <div class="stack">
+          <label for="title">Tittel</label>
+          <input id="title" class="input" name="title" type="text" value="{{ duudl.title }}" />
+        </div>
+
+        <div class="stack">
+          <label>Datoer</label>
+          <div id="calendarRoot" class="calendar"></div>
+          <div class="p" style="margin: 0;">
+            Valgte datoer:
+            <span id="selectedSummary" class="pill">...</span>
+          </div>
+          <input type="hidden" name="selected_days_json" id="selectedDaysJson" value="[]" />
+        </div>
+
+        <div class="row">
+          <button class="btn btn--primary" type="submit">Lagre</button>
+          <button class="btn btn--danger" type="button" id="clearBtn">Nullstill datoer</button>
+        </div>
+      </form>
+    </div>
+
+    <div class="card stack">
+      <div class="row" style="justify-content: space-between;">
+        <div>
+          <h2 class="h1" style="font-size: 18px;">Mottatte svar</h2>
+          <p class="p">Klikk for å endre</p>
+        </div>
+      </div>
+      <div id="gridRoot" style="overflow:auto;"></div>
+    </div>
+  </div>
+
+  <div id="modalBackdrop" class="modalBackdrop" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <h3 id="modalTitle" class="modal__title">Advarsel</h3>
+      <p class="modal__body" id="modalBody"></p>
+      <div class="modal__actions">
+        <button class="btn btn--ghost" type="button" id="modalCancel">Avbryt</button>
+        <button class="btn btn--danger" type="button" id="modalOk">OK</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    window.__DUUDL_TOKEN__ = {{ duudl.token|tojson }};
+  </script>
+  <script type="module" src="{{ url_for('static', filename='edit_duudl.js') }}"></script>
+{% endblock %}
+

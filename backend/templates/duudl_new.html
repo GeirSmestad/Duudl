@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block content %}
+  <div class="stack">
+    <div class="row" style="justify-content: space-between;">
+      <div>
+        <h1 class="h1">Ny Duudl</h1>
+        <p class="p">Velg en tittel og hvilke datoer som er aktuelle.</p>
+      </div>
+      <div>
+        <a class="btn btn--ghost" href="{{ url_for('overview') }}">Tilbake</a>
+      </div>
+    </div>
+
+    <div class="card stack">
+      <form id="duudlForm" method="post" action="{{ url_for('duudl_new_post') }}" class="stack">
+        <div class="stack">
+          <label for="title">Tittel</label>
+          <input id="title" class="input" name="title" type="text" placeholder="F.eks. Februartreff" />
+        </div>
+
+        <div class="stack">
+          <label>Datoer</label>
+          <div id="calendarRoot" class="calendar"></div>
+          <div class="p" style="margin: 0;">
+            Valgte datoer:
+            <span id="selectedSummary" class="pill">ingen</span>
+          </div>
+          <input type="hidden" name="selected_days_json" id="selectedDaysJson" value="[]" />
+        </div>
+
+        <div class="row">
+          <button class="btn btn--primary" type="submit">Opprett</button>
+          <button class="btn btn--danger" type="button" id="clearBtn">Nullstill</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script type="module" src="{{ url_for('static', filename='create_duudl.js') }}"></script>
+{% endblock %}
+

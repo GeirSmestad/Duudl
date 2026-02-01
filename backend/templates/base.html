@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="no">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{{ title or "Duudl" }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='app.css') }}" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="topbar__left">
+        <a class="topbar__brand" href="{{ url_for('overview') }}">Duudl</a>
+      </div>
+      <div class="topbar__center">
+        {% if selected_user %}
+          Du er: <strong>{{ selected_user.display_name }}</strong>
+        {% else %}
+          Du er: <strong>ikke valgt</strong>
+        {% endif %}
+      </div>
+      <div class="topbar__right">
+        {% if is_authed %}
+          <form method="post" action="{{ url_for('logout') }}">
+            <button class="btn btn--ghost" type="submit">Logg ut</button>
+          </form>
+        {% endif %}
+      </div>
+    </header>
+
+    <main class="page">
+      {% if flash_error %}
+        <div class="flash flash--error">{{ flash_error }}</div>
+      {% endif %}
+
+      {% block content %}{% endblock %}
+    </main>
+  </body>
+</html>
+

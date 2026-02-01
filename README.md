@@ -1,2 +1,3 @@
 # Duudl
-Off-brand clone of a popular friend scheduling service
+
+This is an off-brand clone of a popular meetup scheduling service.

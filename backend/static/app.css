@@ -1,0 +1,347 @@
+:root {
+  --bg: #0b1220;
+  --panel: #111a2e;
+  --text: #e7eefc;
+  --muted: #a9b7d6;
+  --border: rgba(231, 238, 252, 0.12);
+  --accent: #7aa2ff;
+  --danger: #ff6b6b;
+  --ok: #6ef0b7;
+  --warn: #ffd166;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+  background: radial-gradient(1200px 600px at 20% 0%, rgba(122, 162, 255, 0.16), transparent 55%),
+    radial-gradient(900px 500px at 85% 10%, rgba(110, 240, 183, 0.14), transparent 55%),
+    var(--bg);
+  color: var(--text);
+}
+
+a {
+  color: inherit;
+}
+
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 12px;
+  align-items: center;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+  background: rgba(11, 18, 32, 0.72);
+  backdrop-filter: blur(10px);
+}
+
+.topbar__brand {
+  text-decoration: none;
+  font-weight: 800;
+  letter-spacing: 0.3px;
+}
+
+.topbar__center {
+  color: var(--muted);
+}
+
+.topbar__right {
+  justify-self: end;
+}
+
+.page {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 20px 16px 48px;
+}
+
+.card {
+  background: rgba(17, 26, 46, 0.75);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 16px;
+  box-shadow: 0 18px 60px rgba(0, 0, 0, 0.25);
+}
+
+.h1 {
+  margin: 0 0 8px 0;
+  font-size: 22px;
+}
+
+.p {
+  margin: 0 0 14px 0;
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+.row {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.stack {
+  display: grid;
+  gap: 12px;
+}
+
+.btn {
+  border: 1px solid var(--border);
+  background: rgba(231, 238, 252, 0.08);
+  color: var(--text);
+  padding: 10px 12px;
+  border-radius: 12px;
+  cursor: pointer;
+  font-weight: 650;
+}
+
+.btn:hover {
+  border-color: rgba(231, 238, 252, 0.22);
+}
+
+.btn--primary {
+  background: rgba(122, 162, 255, 0.22);
+  border-color: rgba(122, 162, 255, 0.42);
+}
+
+.btn--danger {
+  background: rgba(255, 107, 107, 0.18);
+  border-color: rgba(255, 107, 107, 0.42);
+}
+
+.btn--ghost {
+  background: transparent;
+}
+
+.input,
+textarea {
+  width: 100%;
+  border: 1px solid var(--border);
+  background: rgba(231, 238, 252, 0.06);
+  color: var(--text);
+  padding: 10px 12px;
+  border-radius: 12px;
+}
+
+label {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.flash {
+  margin: 0 0 12px 0;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: rgba(231, 238, 252, 0.06);
+}
+
+.flash--error {
+  border-color: rgba(255, 107, 107, 0.35);
+  background: rgba(255, 107, 107, 0.12);
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  overflow: hidden;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+}
+
+.table th,
+.table td {
+  padding: 10px 10px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+}
+
+.table th {
+  text-align: left;
+  color: var(--muted);
+  font-weight: 650;
+  background: rgba(231, 238, 252, 0.04);
+}
+
+.table tr:last-child td {
+  border-bottom: 0;
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.calendar {
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+.calendar__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 10px;
+  border-bottom: 1px solid var(--border);
+  background: rgba(231, 238, 252, 0.04);
+}
+
+.calendar__title {
+  font-weight: 750;
+}
+
+.calendar__grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+}
+
+.calendar__dow {
+  padding: 8px 8px;
+  color: var(--muted);
+  font-size: 12px;
+  border-bottom: 1px solid var(--border);
+  background: rgba(231, 238, 252, 0.03);
+}
+
+.calendar__day {
+  min-height: 44px;
+  padding: 8px 8px;
+  border-bottom: 1px solid var(--border);
+  border-right: 1px solid var(--border);
+  cursor: pointer;
+  user-select: none;
+}
+
+.calendar__day:nth-child(7n) {
+  border-right: 0;
+}
+
+.calendar__day--empty {
+  cursor: default;
+  background: rgba(231, 238, 252, 0.02);
+}
+
+.calendar__day--selected {
+  background: rgba(122, 162, 255, 0.18);
+  outline: 1px solid rgba(122, 162, 255, 0.35);
+}
+
+.gridTable {
+  width: 100%;
+  border-collapse: collapse;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+.gridTable th,
+.gridTable td {
+  border-bottom: 1px solid var(--border);
+  border-right: 1px solid var(--border);
+  padding: 8px;
+  text-align: center;
+  min-width: 44px;
+}
+
+.gridTable th {
+  position: sticky;
+  top: 56px;
+  background: rgba(17, 26, 46, 0.95);
+  color: var(--muted);
+  font-weight: 700;
+  backdrop-filter: blur(8px);
+}
+
+.gridTable td:last-child,
+.gridTable th:last-child {
+  border-right: 0;
+}
+
+.gridCell {
+  cursor: pointer;
+  border-radius: 10px;
+}
+
+.gridCell--readonly {
+  cursor: not-allowed;
+  opacity: 0.72;
+}
+
+.gridRow--me td {
+  background: rgba(110, 240, 183, 0.06);
+}
+
+.gridCell--yes {
+  background: rgba(110, 240, 183, 0.18);
+}
+
+.gridCell--no {
+  background: rgba(255, 107, 107, 0.18);
+}
+
+.gridCell--inconvenient {
+  background: rgba(255, 209, 102, 0.18);
+}
+
+.modalBackdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  z-index: 20;
+}
+
+.modalBackdrop--open {
+  display: flex;
+}
+
+.modal {
+  width: min(520px, 100%);
+  background: rgba(17, 26, 46, 0.98);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 14px;
+}
+
+.modal__title {
+  margin: 0 0 6px 0;
+  font-size: 16px;
+}
+
+.modal__body {
+  margin: 0 0 12px 0;
+  color: var(--muted);
+}
+
+.modal__actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+@media (max-width: 760px) {
+  .topbar {
+    grid-template-columns: auto 1fr auto;
+  }
+  .gridTable th {
+    top: 56px;
+  }
+}
+

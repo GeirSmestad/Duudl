@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block content %}
+  <div class="stack">
+    <div class="row" style="justify-content: space-between;">
+      <div>
+        <h1 class="h1">Oversikt</h1>
+        <!-- <p class="p">Historiske Duudler</p> -->
+      </div>
+      <div>
+        <a class="btn btn--primary" href="{{ url_for('duudl_new') }}">Ny Duudl</a>
+      </div>
+    </div>
+
+    <div class="card">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Tittel</th>
+            <th>Opprettet av</th>
+            <th>Dato</th>
+            <th>Antall svar</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% if duudls|length == 0 %}
+            <tr>
+              <td colspan="4" style="color: var(--muted);">Ingen Duudls enda.</td>
+            </tr>
+          {% endif %}
+
+          {% for d in duudls %}
+            <tr>
+              <td><a href="{{ url_for('show_duudl', token=d.token) }}">{{ d.title }}</a></td>
+              <td>{{ d.created_by_display_name }}</td>
+              <td>{{ d.created_at }}</td>
+              <td><span class="pill">{{ d.response_user_count }}</span></td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+{% endblock %}
+

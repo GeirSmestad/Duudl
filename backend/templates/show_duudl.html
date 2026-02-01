@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block content %}
+  <div class="stack">
+    <div class="row" style="justify-content: space-between;">
+      <div>
+        <h1 class="h1">{{ duudl.title }}</h1>
+        <p class="p">Klikk for å svare: ja / nei / upraktisk</p>
+      </div>
+      <div class="row">
+        <a class="btn btn--ghost" href="{{ url_for('overview') }}">Oversikt</a>
+        <a class="btn btn--ghost" href="{{ url_for('edit_duudl_page', token=duudl.token) }}">Rediger</a>
+      </div>
+    </div>
+
+    <div class="row">
+      <button class="btn btn--primary" type="button" id="copyUrlBtn">Kopier Duudl-URL</button>
+      <span id="copyStatus" class="pill" style="display:none;"></span>
+    </div>
+
+    <div class="card">
+      <div id="gridRoot" style="overflow:auto;"></div>
+    </div>
+  </div>
+
+  <script type="module">
+    window.__DUUDL_TOKEN__ = {{ duudl.token|tojson }};
+    window.__SELECTED_USER_ID__ = {{ selected_user_id|tojson }};
+  </script>
+  <script type="module" src="{{ url_for('static', filename='show_duudl.js') }}"></script>
+{% endblock %}
+
