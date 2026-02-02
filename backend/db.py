@@ -185,8 +185,16 @@ def create_duudl(*, token: str, title: str, description: str, created_by_user_id
     )
     duudl_id = int(cur.lastrowid)
 
-    for day in sorted(set(days)):
+    unique_days = sorted(set(days))
+    for day in unique_days:
         db.execute("INSERT INTO duudl_dates (duudl_id, day) VALUES (?, ?)", (duudl_id, day))
+
+    # Default availability: the creator is "yes" for all days when a Duudl is created.
+    for day in unique_days:
+        db.execute(
+            "INSERT OR IGNORE INTO responses (duudl_id, user_id, day, value) VALUES (?, ?, ?, 'yes')",
+            (duudl_id, created_by_user_id, day),
+        )
 
     db.commit()
 
@@ -256,6 +264,17 @@ def update_duudl(*, duudl_id: int, title: str, description: str, new_days: list[
 
     for day in added:
         db.execute("INSERT OR IGNORE INTO duudl_dates (duudl_id, day) VALUES (?, ?)", (duudl_id, day))
+
+    # Default availability for newly added dates: original creator is "yes".
+    if added:
+        row = db.execute("SELECT created_by_user_id FROM duudls WHERE id = ?", (duudl_id,)).fetchone()
+        if row is not None:
+            creator_user_id = int(row["created_by_user_id"])
+            for day in added:
+                db.execute(
+                    "INSERT OR IGNORE INTO responses (duudl_id, user_id, day, value) VALUES (?, ?, ?, 'yes')",
+                    (duudl_id, creator_user_id, day),
+                )
 
     for day in removed:
         db.execute("DELETE FROM duudl_dates WHERE duudl_id = ? AND day = ?", (duudl_id, day))
