@@ -19,7 +19,7 @@
         </div>
 
         <div class="stack">
-          <label>Datoer</label>
+          <label>Tilgjengelige datoer</label>
           <div id="calendarRoot" class="calendar"></div>
           <div class="p" style="margin: 0;">
             Valgte datoer:
@@ -36,6 +36,16 @@
     </div>
 
     <div class="card stack">
+      <div class="row" style="justify-content: space-between;">
+        <div>
+          <h2 class="h1" style="font-size: 18px;">Mottatte svar</h2>
+          <p class="p">Klikk for å endre (men bare hvis du faktisk ønsker å redigere svarene til noen andre)</p>
+        </div>
+      </div>
+      <div id="gridRoot" style="overflow:auto;"></div>
+    </div>
+
+    <div class="card stack">
       <div class="row" style="justify-content: space-between; align-items: start;">
         <div>
           <h2 class="h1" style="font-size: 18px;">Slett Duudl</h2>
@@ -47,16 +57,6 @@
           </form>
         </div>
       </div>
-    </div>
-
-    <div class="card stack">
-      <div class="row" style="justify-content: space-between;">
-        <div>
-          <h2 class="h1" style="font-size: 18px;">Mottatte svar</h2>
-          <p class="p">Klikk for å endre</p>
-        </div>
-      </div>
-      <div id="gridRoot" style="overflow:auto;"></div>
     </div>
   </div>
 

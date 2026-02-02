@@ -4,11 +4,13 @@
     <div class="row" style="justify-content: space-between;">
       <div>
         <h1 class="h1">{{ duudl.title }}</h1>
-        <p class="p">Klikk for å svare: ja / nei / upraktisk</p>
+        <p class="p">Klikk for å svare: ja / nei / ikke favorittdagen min</p>
       </div>
       <div class="row">
-        <a class="btn btn--ghost" href="{{ url_for('overview') }}">Oversikt</a>
-        <a class="btn btn--ghost" href="{{ url_for('edit_duudl_page', token=duudl.token) }}">Rediger</a>
+        <a class="btn btn--ghost" href="{{ url_for('overview') }}">Tilbake til alle Duudlene våre</a>
+        <a class="btn btn--ghost" style="opacity: 0.65; font-size: 13px; padding: 8px 10px;" href="{{ url_for('edit_duudl_page', token=duudl.token) }}">
+          Rediger denne Duudlen
+        </a>
       </div>
     </div>
 
