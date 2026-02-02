@@ -5,6 +5,10 @@ __pycache__/
 # Local SQLite DB (default path)
 data/duudl.db
 
+# Deploy archive (created by `just deploy` in some workflows)
+.duudl-deploy.tgz
+duudl-deploy.tgz
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]
