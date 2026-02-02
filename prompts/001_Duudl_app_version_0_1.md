@@ -6,8 +6,8 @@ This is a responsive webapp to help a specific group of close friends find dates
 
 No work has been done on the app yet, so we're starting from scratch. Read AGENTS.md for the environmental invariants we will build with. Create whatever you need within those constraints.
 
-Domain: duudl.twerkules.com
-Server logon: ssh bergenomap (keys are present on development machine)
+- Domain: duudl.twerkules.com
+- Server logon: ssh bergenomap (keys are present on development machine)
 
 You may use the ensure_schema() pattern for building the required SQL database schema.
 
