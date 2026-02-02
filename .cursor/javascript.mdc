@@ -1,0 +1,12 @@
+---
+description: JavaScript coding conventions for this project
+globs: ["**/*.js"]
+---
+
+# JavaScript Conventions
+
+- Use **explicit boolean checks** (`if (value === true)`) rather than implicit truthy/falsy testing
+- This project has no package manager or build tooling; if you see explicit need for it then ask first
+- Ask before introducing JS libraries
+- Use a pragmatic ES module separation for new code
+- Prefer clear, descriptive variable names over brevity

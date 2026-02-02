@@ -1,0 +1,8 @@
+---
+description: CSS coding conventions for this project
+globs: ["**/*.css"]
+---
+
+# CSS Conventions
+
+- Separate CSS files per page
