@@ -15,7 +15,12 @@
       <form id="duudlForm" method="post" action="{{ url_for('duudl_new_post') }}" class="stack">
         <div class="stack">
           <label for="title">Tittel</label>
-          <input id="title" class="input" name="title" type="text" value="{{ form_title or '' }}" />
+          <input id="title" class="input" name="title" placeholder="F. eks: Bytting av kjede" type="text" value="{{ form_title or '' }}" />
+        </div>
+
+        <div class="stack">
+          <label for="description">Beskrivelse (valgfritt)</label>
+          <textarea id="description" name="description" rows="4" placeholder="Denne gangen skal vi bytte sykkelkjede!">{{ form_description or '' }}</textarea>
         </div>
 
         <div class="stack">

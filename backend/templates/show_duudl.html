@@ -4,6 +4,9 @@
     <div class="row" style="justify-content: space-between;">
       <div>
         <h1 class="h1">{{ duudl.title }}</h1>
+        {% if duudl.description %}
+          <p class="p">{{ duudl.description }}</p>
+        {% endif %}
         <p class="p">Klikk for å svare: ja / nei / ikke favorittdagen min</p>
       </div>
       <div class="row">

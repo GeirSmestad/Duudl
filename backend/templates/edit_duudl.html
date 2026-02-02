@@ -15,7 +15,12 @@
       <form id="editForm" method="post" action="{{ url_for('edit_duudl_post', token=duudl.token) }}" class="stack">
         <div class="stack">
           <label for="title">Tittel</label>
-          <input id="title" class="input" name="title" type="text" value="{{ duudl.title }}" />
+          <input id="title" class="input" name="title" placeholder="F. eks: Bytting av kjede" type="text" value="{{ duudl.title }}" />
+        </div>
+
+        <div class="stack">
+          <label for="description">Beskrivelse (valgfritt)</label>
+          <textarea id="description" name="description" rows="4" placeholder="Denne gangen skal vi bytte sykkelkjede!">{{ duudl.description or '' }}</textarea>
         </div>
 
         <div class="stack">

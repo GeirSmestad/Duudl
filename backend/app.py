@@ -124,6 +124,7 @@ def create_app() -> Flask:
             "duudl_new.html",
             title="Ny Duudl",
             form_title=form_state.get("title", ""),
+            form_description=form_state.get("description", ""),
             form_selected_days_json=form_state.get("selected_days_json", "[]"),
             **_template_context(),
         )
@@ -134,7 +135,10 @@ def create_app() -> Flask:
         selected_user = get_selected_user()
         assert selected_user is not None
 
-        title = (request.form.get("title") or "").strip()
+        title_raw = request.form.get("title") or ""
+        description_raw = request.form.get("description") or ""
+        title = title_raw.strip()
+        description = description_raw.strip()
         days_json = request.form.get("selected_days_json") or "[]"
         try:
             days = json.loads(days_json)
@@ -142,17 +146,29 @@ def create_app() -> Flask:
             days = []
 
         if not title:
-            _set_form_state("duudl_new_form_state", {"title": "", "selected_days_json": days_json})
+            _set_form_state(
+                "duudl_new_form_state",
+                {"title": title_raw, "description": description_raw, "selected_days_json": days_json},
+            )
             session["flash_error"] = "Skriv inn en tittel."
             return redirect(url_for("duudl_new"))
 
         if not isinstance(days, list) or not days:
-            _set_form_state("duudl_new_form_state", {"title": title, "selected_days_json": days_json})
+            _set_form_state(
+                "duudl_new_form_state",
+                {"title": title_raw, "description": description_raw, "selected_days_json": days_json},
+            )
             session["flash_error"] = "Velg minst én dato."
             return redirect(url_for("duudl_new"))
 
         token = secrets.token_urlsafe(8)
-        create_duudl(token=token, title=title, created_by_user_id=selected_user.id, days=[str(d) for d in days])
+        create_duudl(
+            token=token,
+            title=title,
+            description=description,
+            created_by_user_id=selected_user.id,
+            days=[str(d) for d in days],
+        )
         return redirect(url_for("show_duudl", token=token))
 
     @app.get("/d/<token>")
@@ -195,6 +211,7 @@ def create_app() -> Flask:
             return Response("Not found", status=404)
 
         title = (request.form.get("title") or "").strip()
+        description = (request.form.get("description") or "").strip()
         days_json = request.form.get("selected_days_json") or "[]"
         try:
             days = json.loads(days_json)
@@ -209,7 +226,7 @@ def create_app() -> Flask:
             session["flash_error"] = "Velg minst én dato."
             return redirect(url_for("edit_duudl_page", token=token))
 
-        update_duudl(duudl_id=duudl.id, title=title, new_days=[str(d) for d in days])
+        update_duudl(duudl_id=duudl.id, title=title, description=description, new_days=[str(d) for d in days])
         return redirect(url_for("show_duudl", token=token))
 
     @app.post("/d/<token>/delete")

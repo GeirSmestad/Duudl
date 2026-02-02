@@ -30,6 +30,7 @@ class Duudl:
     id: int
     token: str
     title: str
+    description: str
     created_at: str
     created_by_user_id: int
 
@@ -74,6 +75,7 @@ def ensure_schema() -> None:
           id INTEGER PRIMARY KEY,
           token TEXT NOT NULL UNIQUE,
           title TEXT NOT NULL,
+          description TEXT NOT NULL DEFAULT '',
           created_by_user_id INTEGER NOT NULL,
           created_at TEXT NOT NULL,
           FOREIGN KEY(created_by_user_id) REFERENCES users(id)
@@ -104,8 +106,16 @@ def ensure_schema() -> None:
         """
     )
 
+    _ensure_duudls_has_description(db)
     seed_users(db)
     db.commit()
+
+
+def _ensure_duudls_has_description(db: sqlite3.Connection) -> None:
+    cols = [r["name"] for r in db.execute("PRAGMA table_info(duudls)").fetchall()]
+    if "description" in cols:
+        return
+    db.execute("ALTER TABLE duudls ADD COLUMN description TEXT NOT NULL DEFAULT ''")
 
 
 def seed_users(db: sqlite3.Connection) -> None:
@@ -166,12 +176,12 @@ def list_duudls() -> list[DuudlListRow]:
     ]
 
 
-def create_duudl(*, token: str, title: str, created_by_user_id: int, days: list[str]) -> None:
+def create_duudl(*, token: str, title: str, description: str, created_by_user_id: int, days: list[str]) -> None:
     db = get_db()
     created_at = utc_now_iso()
     cur = db.execute(
-        "INSERT INTO duudls (token, title, created_by_user_id, created_at) VALUES (?, ?, ?, ?)",
-        (token, title, created_by_user_id, created_at),
+        "INSERT INTO duudls (token, title, description, created_by_user_id, created_at) VALUES (?, ?, ?, ?, ?)",
+        (token, title, description, created_by_user_id, created_at),
     )
     duudl_id = int(cur.lastrowid)
 
@@ -183,7 +193,7 @@ def create_duudl(*, token: str, title: str, created_by_user_id: int, days: list[
 
 def get_duudl_by_token(token: str) -> Duudl | None:
     row = get_db().execute(
-        "SELECT id, token, title, created_at, created_by_user_id FROM duudls WHERE token = ?",
+        "SELECT id, token, title, description, created_at, created_by_user_id FROM duudls WHERE token = ?",
         (token,),
     ).fetchone()
     if row is None:
@@ -192,6 +202,7 @@ def get_duudl_by_token(token: str) -> Duudl | None:
         id=row["id"],
         token=row["token"],
         title=row["title"],
+        description=row["description"],
         created_at=row["created_at"],
         created_by_user_id=row["created_by_user_id"],
     )
@@ -229,7 +240,7 @@ def upsert_response(*, duudl_id: int, user_id: int, day: str, value: str | None)
     db.commit()
 
 
-def update_duudl(*, duudl_id: int, title: str, new_days: list[str]) -> list[str]:
+def update_duudl(*, duudl_id: int, title: str, description: str, new_days: list[str]) -> list[str]:
     """
     Updates duudl title and dates.
     Returns a list of removed day strings (YYYY-MM-DD).
@@ -241,7 +252,7 @@ def update_duudl(*, duudl_id: int, title: str, new_days: list[str]) -> list[str]
     removed = sorted(existing_days - desired_days)
     added = sorted(desired_days - existing_days)
 
-    db.execute("UPDATE duudls SET title = ? WHERE id = ?", (title, duudl_id))
+    db.execute("UPDATE duudls SET title = ?, description = ? WHERE id = ?", (title, description, duudl_id))
 
     for day in added:
         db.execute("INSERT OR IGNORE INTO duudl_dates (duudl_id, day) VALUES (?, ?)", (duudl_id, day))
