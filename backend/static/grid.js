@@ -19,6 +19,20 @@ export function valueSymbol(value) {
   return "";
 }
 
+const WEEKDAYS = ["Søn", "Man", "Tir", "Ons", "Tor", "Fre", "Lør"]; // JS: 0=Sun..6=Sat
+
+function pad2(n) {
+  return String(n).padStart(2, "0");
+}
+
+export function formatIsoDayHeader(isoDay) {
+  // isoDay: YYYY-MM-DD (treated as local date for display)
+  const [y, m, d] = String(isoDay).split("-").map((x) => Number(x));
+  const dt = new Date(y, (m || 1) - 1, d || 1);
+  const wd = WEEKDAYS[dt.getDay()] ?? "";
+  return `${wd} ${pad2(d)}.${pad2(m)}`;
+}
+
 export function renderGridTable({ rootEl, users, days, responses, rowHighlightUserId, canEditCell }) {
   rootEl.innerHTML = "";
 
@@ -34,7 +48,7 @@ export function renderGridTable({ rootEl, users, days, responses, rowHighlightUs
 
   for (const day of days) {
     const th = document.createElement("th");
-    th.textContent = day;
+    th.textContent = formatIsoDayHeader(day);
     headRow.append(th);
   }
 

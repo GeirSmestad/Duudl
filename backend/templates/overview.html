@@ -32,7 +32,7 @@
             <tr>
               <td><a href="{{ url_for('show_duudl', token=d.token) }}">{{ d.title }}</a></td>
               <td>{{ d.created_by_display_name }}</td>
-              <td>{{ d.created_at[:10] }}</td>
+              <td>{{ d.created_at | no_month_date }}</td>
               <td><span class="pill">{{ d.response_user_count }}</span></td>
             </tr>
           {% endfor %}

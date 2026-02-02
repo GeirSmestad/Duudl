@@ -46,6 +46,40 @@ def create_app() -> Flask:
     app.config["SECRET_KEY"] = _load_secret_key()
     app.config["DATABASE_PATH"] = os.environ.get("DUUDL_DB_PATH", "data/duudl.db")
 
+    @app.template_filter("no_month_date")
+    def no_month_date(value: str) -> str:
+        """
+        Formats an ISO date/datetime string to 'DD. monthname YYYY' (Norwegian month name, lowercase).
+        Example: '2026-02-03T12:34:56Z' -> '03. februar 2026'
+        """
+        s = (value or "").strip()
+        iso = s[:10]  # YYYY-MM-DD
+        try:
+            year = int(iso[0:4])
+            month = int(iso[5:7])
+            day = int(iso[8:10])
+        except Exception:
+            return iso or s
+
+        months = [
+            "januar",
+            "februar",
+            "mars",
+            "april",
+            "mai",
+            "juni",
+            "juli",
+            "august",
+            "september",
+            "oktober",
+            "november",
+            "desember",
+        ]
+        if 1 <= month <= 12:
+            month_name = months[month - 1]
+            return f"{day}. {month_name} {year}"
+        return iso
+
     @app.before_request
     def _ensure_db_schema():
         ensure_schema()
