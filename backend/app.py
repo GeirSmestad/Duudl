@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import os
 import secrets
 from typing import Any
 
@@ -42,8 +43,8 @@ def _pop_form_state(key: str) -> dict[str, Any]:
 
 def create_app() -> Flask:
     app = Flask(__name__)
-    app.config["SECRET_KEY"] = "dev"
-    app.config["DATABASE_PATH"] = "data/duudl.db"
+    app.config["SECRET_KEY"] = _load_secret_key()
+    app.config["DATABASE_PATH"] = os.environ.get("DUUDL_DB_PATH", "data/duudl.db")
 
     @app.before_request
     def _ensure_db_schema():
@@ -305,6 +306,22 @@ def create_app() -> Flask:
         return jsonify({"ok": True})
 
     return app
+
+
+def _load_secret_key() -> str:
+    explicit = os.environ.get("DUUDL_SECRET_KEY")
+    if explicit:
+        return explicit
+
+    key_file = os.environ.get("DUUDL_SECRET_KEY_FILE")
+    if key_file:
+        try:
+            with open(key_file, "r", encoding="utf-8") as f:
+                return f.read().strip()
+        except Exception:
+            pass
+
+    return "dev"
 
 
 def main() -> None:
