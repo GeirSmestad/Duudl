@@ -401,6 +401,10 @@ label {
   overflow-wrap: anywhere;
 }
 
+.gridCell--comment .gridCell__text {
+  font-size: 9pt;
+}
+
 .commentTooltip--pinned {
   z-index: 60;
 }
