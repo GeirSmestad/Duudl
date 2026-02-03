@@ -15,13 +15,11 @@ function updateGridCellForMyDay(state, day) {
   const key = `${selectedUserId}:${day}`;
   const comment = (state.comments?.[key] ?? "").trim();
 
-  cell.textContent = comment ? comment : "";
-  cell.classList.toggle("gridCell--comment", Boolean(comment));
-  if (comment) {
-    cell.title = comment;
-  } else {
-    cell.removeAttribute("title");
+  const textEl = cell.querySelector(".gridCell__text");
+  if (textEl) {
+    textEl.textContent = comment ? comment : "";
   }
+  cell.classList.toggle("gridCell--comment", Boolean(comment));
 }
 
 const FULL_WEEKDAYS = ["Søndag", "Mandag", "Tirsdag", "Onsdag", "Torsdag", "Fredag", "Lørdag"]; // 0=Sun..6=Sat

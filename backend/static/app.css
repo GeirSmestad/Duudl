@@ -10,6 +10,8 @@
   --warn: #ffd166;
   --grid-date-col-width: 86px; /* adjust to taste */
   --grid-name-col-width: 190px; /* adjust to taste */
+  --grid-cell-lines: 3;
+  --grid-cell-line-height: 1.15;
 }
 
 * {
@@ -309,6 +311,14 @@ label {
   width: var(--grid-date-col-width);
 }
 
+/* Fixed vertical size for date cells: exactly N lines (no growth/shrink). */
+.gridTable td:not(:first-child) {
+  line-height: var(--grid-cell-line-height);
+  height: calc((var(--grid-cell-lines) * 1em * var(--grid-cell-line-height)) + 16px);
+  min-height: calc((var(--grid-cell-lines) * 1em * var(--grid-cell-line-height)) + 16px);
+  vertical-align: middle;
+}
+
 /* Keep the name column visible when horizontally scrolling wide tables. */
 .gridTable th:first-child {
   position: -webkit-sticky;
@@ -366,11 +376,14 @@ label {
   background: rgba(255, 242, 40, 0.7);
 }
 
-.gridCell--comment {
-  /* Only comment cells are cropped; headers + names should be fully visible. */
-  white-space: nowrap;
+.gridCell__text {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: var(--grid-cell-lines);
+  line-clamp: var(--grid-cell-lines);
   overflow: hidden;
   text-overflow: ellipsis;
+  word-break: break-word;
 }
 
 .commentTooltip {

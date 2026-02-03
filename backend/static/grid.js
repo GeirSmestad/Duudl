@@ -75,9 +75,11 @@ export function renderGridTable({ rootEl, users, days, responses, comments, rowH
       td.dataset.userId = String(u.id);
       td.dataset.day = day;
       td.className = cellClassForValue(val);
-      td.textContent = displayCellText({ value: val, comment });
+      const textEl = document.createElement("div");
+      textEl.className = "gridCell__text";
+      textEl.textContent = displayCellText({ value: val, comment });
+      td.append(textEl);
       if (comment) {
-        td.title = comment;
         td.classList.add("gridCell--comment");
       }
 
@@ -117,7 +119,7 @@ export function attachCommentHoverTooltip(containerEl) {
     if (!td || !td.classList.contains("gridCell--comment")) return hide();
 
     // Only show when the cell is actually truncated.
-    const isTruncated = td.scrollWidth > td.clientWidth;
+    const isTruncated = td.scrollWidth > td.clientWidth || td.scrollHeight > td.clientHeight;
     if (!isTruncated) return hide();
 
     const fullText = (td.textContent || "").trim();
