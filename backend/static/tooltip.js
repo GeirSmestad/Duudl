@@ -101,3 +101,62 @@ export function isTextTruncated(el, tolerancePx = 2) {
   return naturalHeight - clampedHeight > tolerancePx;
 }
 
+export function createPinnedTooltip({ id, className }) {
+  let tooltipEl = document.getElementById(id);
+  if (!tooltipEl) {
+    tooltipEl = document.createElement("div");
+    tooltipEl.id = id;
+    tooltipEl.className = className;
+    tooltipEl.style.display = "none";
+    document.body.append(tooltipEl);
+  }
+
+  let _visible = false;
+
+  function hide() {
+    tooltipEl.style.display = "none";
+    _visible = false;
+  }
+
+  function clamp(v, lo, hi) {
+    return Math.max(lo, Math.min(hi, v));
+  }
+
+  function showNearElement({ anchorEl, text, prefer = "below" }) {
+    const t = (text || "").trim();
+    if (!anchorEl || !t) return hide();
+
+    tooltipEl.textContent = t;
+    tooltipEl.style.display = "block";
+
+    // Measure after display so we can clamp to viewport.
+    const rect = anchorEl.getBoundingClientRect();
+    const tipRect = tooltipEl.getBoundingClientRect();
+    const pad = 10;
+
+    let x = rect.left + 8;
+    let y = prefer === "above" ? rect.top - tipRect.height - 8 : rect.bottom + 8;
+
+    // If preferred placement would go off-screen, flip.
+    if (y + tipRect.height + pad > window.innerHeight) {
+      y = rect.top - tipRect.height - 8;
+    }
+    if (y < pad) {
+      y = rect.bottom + 8;
+    }
+
+    x = clamp(x, pad, window.innerWidth - tipRect.width - pad);
+    y = clamp(y, pad, window.innerHeight - tipRect.height - pad);
+
+    tooltipEl.style.left = `${x}px`;
+    tooltipEl.style.top = `${y}px`;
+    _visible = true;
+  }
+
+  function isVisible() {
+    return _visible;
+  }
+
+  return { el: tooltipEl, showNearElement, hide, isVisible };
+}
+

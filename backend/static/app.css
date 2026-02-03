@@ -401,6 +401,10 @@ label {
   overflow-wrap: anywhere;
 }
 
+.commentTooltip--pinned {
+  z-index: 60;
+}
+
 .segmented {
   display: inline-flex;
   border: 1px solid var(--border);
