@@ -9,7 +9,7 @@
   --ok: #6ef0b7;
   --warn: #ffd166;
   --grid-date-col-width: 86px; /* adjust to taste */
-  --grid-name-col-width: 220px; /* adjust to taste */
+  --grid-name-col-width: 190px; /* adjust to taste */
 }
 
 * {
@@ -312,7 +312,7 @@ label {
   position: sticky;
   left: 0;
   z-index: 5; /* above other headers */
-  background: rgba(17, 26, 46, 0.98);
+  background: var(--panel);
   box-shadow: 8px 0 14px rgba(0, 0, 0, 0.22);
 }
 
@@ -320,13 +320,14 @@ label {
   position: sticky;
   left: 0;
   z-index: 3; /* above other body cells */
-  background: rgba(17, 26, 46, 0.96);
+  background: var(--panel);
   box-shadow: 8px 0 14px rgba(0, 0, 0, 0.18);
 }
 
 /* Preserve a hint of the \"my row\" highlight in the sticky name column. */
 .gridRow--me td:first-child {
-  background: rgba(110, 240, 183, 0.12);
+  background: var(--panel);
+  box-shadow: inset 3px 0 0 rgba(0, 220, 140, 0.95), 8px 0 14px rgba(0, 0, 0, 0.18);
 }
 
 .gridTable td:last-child,
@@ -345,7 +346,7 @@ label {
 }
 
 /* Highlight your row, but do not override explicit yes/no/inconvenient cell colors. */
-.gridRow--me td:not(.gridCell--yes):not(.gridCell--no):not(.gridCell--inconvenient) {
+.gridRow--me td:not(:first-child):not(.gridCell--yes):not(.gridCell--no):not(.gridCell--inconvenient) {
   background: rgba(110, 240, 183, 0.08);
 }
 
