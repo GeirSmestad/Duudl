@@ -108,6 +108,7 @@ function ensureMaps(state) {
 function createSegmentedChoice({ label, options, value, onChange }) {
   const root = document.createElement("div");
   root.className = "segmented";
+  if (label) root.setAttribute("aria-label", label);
 
   for (const opt of options) {
     const btn = document.createElement("button");
@@ -126,13 +127,7 @@ function createSegmentedChoice({ label, options, value, onChange }) {
     root.append(btn);
   }
 
-  const wrap = document.createElement("div");
-  wrap.className = "stack";
-  const l = document.createElement("div");
-  l.className = "pill";
-  l.textContent = label;
-  wrap.append(l, root);
-  return wrap;
+  return root;
 }
 
 function debounceByKey() {
