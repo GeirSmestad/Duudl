@@ -2,6 +2,12 @@ import { attachHoverTooltip, isTextTruncated } from "./tooltip.js";
 
 export const VALUE_CYCLE = [null, "yes", "no", "inconvenient"];
 
+const PENCIL_ICON_SVG = `
+<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" focusable="false">
+  <path fill="currentColor" d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zm2.92 2.33H5v-.92l8.06-8.06.92.92L5.92 19.58zM20.71 7.04a1 1 0 0 0 0-1.41L18.37 3.29a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
+</svg>
+`.trim();
+
 export function nextValue(current) {
   const idx = VALUE_CYCLE.indexOf(current ?? null);
   return VALUE_CYCLE[(idx + 1) % VALUE_CYCLE.length];
@@ -85,8 +91,16 @@ export function renderGridTable({ rootEl, users, days, responses, comments, rowH
         td.classList.add("gridCell--comment");
       }
 
-      if (!canEditCell(u.id, day)) {
+      const editable = canEditCell(u.id, day);
+      if (!editable) {
         td.classList.add("gridCell--readonly");
+      } else {
+        const editBtn = document.createElement("button");
+        editBtn.type = "button";
+        editBtn.className = "gridCell__editBtn";
+        editBtn.setAttribute("aria-label", "Rediger kommentar");
+        editBtn.innerHTML = PENCIL_ICON_SVG;
+        td.append(editBtn);
       }
 
       tr.append(td);
@@ -106,7 +120,7 @@ export function attachCommentHoverTooltip(containerEl) {
   // Since we use multi-line clamping, measure truncation on the inner `.gridCell__text` element.
   return attachHoverTooltip({
     containerEl,
-    targetSelector: "td.gridCell--comment",
+    targetSelector: "td.gridCell--comment:not(.gridCell--editMode)",
     tooltipClassName: "commentTooltip",
     getText: (td) => td.textContent || "",
     shouldShow: (td) => {

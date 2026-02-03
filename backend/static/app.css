@@ -386,6 +386,63 @@ label {
   word-break: break-word;
 }
 
+.gridCell__editBtn {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: clamp(16px, 25%, 24px);
+  height: clamp(16px, 25%, 24px);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  border: 1px solid rgba(231, 238, 252, 0.18);
+  background: rgba(11, 18, 32, 0.55);
+  color: rgba(231, 238, 252, 0.92);
+  cursor: pointer;
+  padding: 0;
+}
+
+.gridCell__editBtn:hover {
+  border-color: rgba(231, 238, 252, 0.30);
+  background: rgba(11, 18, 32, 0.72);
+}
+
+.gridCell__editBtn svg {
+  width: 14px;
+  height: 14px;
+}
+
+.gridInlineEditor {
+  position: absolute;
+  inset: 4px;
+  width: calc(100% - 8px);
+  height: calc(100% - 8px);
+  border: 1px solid rgba(231, 238, 252, 0.20);
+  background: rgba(11, 18, 32, 0.68);
+  color: var(--text);
+  border-radius: 10px;
+  padding: 6px 8px;
+  font-size: 12px;
+  line-height: 1.2;
+  outline: none;
+}
+
+.gridCell--editMode .gridCell__text {
+  visibility: hidden;
+}
+
+.gridCell--editMode .gridCell__editBtn {
+  display: none !important;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  /* Desktop-only affordance: show pencil on hover for editable cells. */
+  td.gridCell:not(.gridCell--readonly):hover .gridCell__editBtn {
+    display: inline-flex;
+  }
+}
+
 .commentTooltip {
   position: fixed;
   z-index: 50;

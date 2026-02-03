@@ -8,6 +8,21 @@ const perDateRoot = document.getElementById("perDateRoot");
 const copyUrlBtn = document.getElementById("copyUrlBtn");
 const copyStatus = document.getElementById("copyStatus");
 
+const INLINE_COMMENT_EDIT_MEDIA = "(hover: hover) and (pointer: fine)";
+const inlineCommentEditEnabled = window.matchMedia?.(INLINE_COMMENT_EDIT_MEDIA)?.matches ?? false;
+
+// UI-only state (not persisted).
+const ui = {
+  openCommentDays: new Set(),
+};
+
+// Day -> { open({focus}), close(), setValue(v), getValue() }
+const perDateEditors = new Map();
+
+let activeGridEdit = null; // { td, day }
+let gridInlineEditor = null;
+let inlineEditDocListenerAttached = false;
+
 function updateGridCellForMyDay(state, day) {
   const cell = gridRoot?.querySelector(`td[data-user-id="${selectedUserId}"][data-day="${day}"]`);
   if (!cell) return;
@@ -72,14 +87,168 @@ function canEditCell(userId, _day) {
   return userId === selectedUserId;
 }
 
+function commentKeyForMyDay(day) {
+  return `${selectedUserId}:${day}`;
+}
+
+function openPerDateCommentEditor(day, { focus = false } = {}) {
+  ui.openCommentDays.add(day);
+  const editor = perDateEditors.get(day);
+  editor?.open({ focus });
+}
+
+function setCommentForMyDay(state, day, comment, { updatePerDateInput = true } = {}) {
+  ensureMaps(state);
+  const key = commentKeyForMyDay(day);
+  state.comments[key] = comment;
+  updateGridCellForMyDay(state, day);
+
+  if (updatePerDateInput) {
+    const editor = perDateEditors.get(day);
+    editor?.setValue(comment);
+  }
+
+  debounce(key, 450, async () => {
+    try {
+      await postResponse({ day, value: state.responses[key] ?? null, comment: state.comments[key] ?? "" });
+    } catch (e) {
+      // ignore
+    }
+  });
+}
+
+async function flushCommentCommitForMyDay(state, day) {
+  ensureMaps(state);
+  const key = commentKeyForMyDay(day);
+  try {
+    await postResponse({ day, value: state.responses[key] ?? null, comment: state.comments[key] ?? "" });
+  } catch (e) {
+    // ignore
+  }
+}
+
+function isGridEditModeActive() {
+  return Boolean(activeGridEdit?.td);
+}
+
+function exitGridEditMode({ flush = true } = {}) {
+  if (!activeGridEdit?.td) return;
+  const { td, day } = activeGridEdit;
+  // Clear active state early to avoid re-entrancy (e.g. blur firing when removing the input).
+  activeGridEdit = null;
+  td.classList.remove("gridCell--editMode");
+  if (gridInlineEditor?.parentElement === td) {
+    td.removeChild(gridInlineEditor);
+  }
+
+  // Fire and forget.
+  if (flush) {
+    void flushCommentCommitForMyDay(state, day);
+  }
+}
+
+function enterGridEditMode({ td, day, state }) {
+  if (!inlineCommentEditEnabled) return;
+  if (!td || !day) return;
+  const userId = Number(td.dataset.userId);
+  if (!userId || !canEditCell(userId, day)) return;
+
+  if (activeGridEdit?.td && activeGridEdit.td !== td) {
+    exitGridEditMode({ flush: true });
+  }
+
+  if (!gridInlineEditor) {
+    gridInlineEditor = document.createElement("input");
+    gridInlineEditor.type = "text";
+    gridInlineEditor.className = "gridInlineEditor";
+    gridInlineEditor.autocomplete = "off";
+    gridInlineEditor.spellcheck = false;
+
+    gridInlineEditor.addEventListener("pointerdown", (ev) => {
+      // Prevent the table click handler from toggling yes/no while editing.
+      ev.stopPropagation();
+    });
+
+    gridInlineEditor.addEventListener("input", () => {
+      const day2 = activeGridEdit?.day;
+      if (!day2) return;
+      setCommentForMyDay(state, day2, gridInlineEditor.value, { updatePerDateInput: true });
+    });
+
+    gridInlineEditor.addEventListener("keydown", (ev) => {
+      if (ev.key === "Enter" || ev.key === "Escape") {
+        ev.preventDefault();
+        exitGridEditMode({ flush: true });
+      }
+    });
+
+    gridInlineEditor.addEventListener("blur", () => {
+      // If focus leaves the input, treat it as an exit.
+      exitGridEditMode({ flush: true });
+    });
+  }
+
+  if (!inlineEditDocListenerAttached) {
+    inlineEditDocListenerAttached = true;
+    document.addEventListener(
+      "pointerdown",
+      (ev) => {
+        if (!activeGridEdit?.td) return;
+        const inside = ev.target instanceof Node ? activeGridEdit.td.contains(ev.target) : false;
+        if (!inside) {
+          exitGridEditMode({ flush: true });
+        }
+      },
+      { capture: true },
+    );
+  }
+
+  td.classList.add("gridCell--editMode");
+  activeGridEdit = { td, day };
+
+  const key = commentKeyForMyDay(day);
+  gridInlineEditor.value = state.comments?.[key] ?? "";
+  td.append(gridInlineEditor);
+
+  // Ensure the per-date editor is visible + synchronized, but do not steal focus.
+  openPerDateCommentEditor(day, { focus: false });
+  perDateEditors.get(day)?.setValue(gridInlineEditor.value);
+
+  gridInlineEditor.focus();
+  try {
+    gridInlineEditor.setSelectionRange(gridInlineEditor.value.length, gridInlineEditor.value.length);
+  } catch (e) {
+    // ignore
+  }
+}
+
 function attachHandlers(tableEl, state) {
   tableEl.addEventListener("click", async (ev) => {
+    if (ev.target.closest(".gridCell__editBtn")) {
+      if (!inlineCommentEditEnabled) return;
+      const td = ev.target.closest("td");
+      if (!td) return;
+      const day = td.dataset.day;
+      if (!day) return;
+      enterGridEditMode({ td, day, state });
+      return;
+    }
+
+    if (ev.target.closest(".gridInlineEditor")) {
+      return;
+    }
+
     const td = ev.target.closest("td");
     if (!td) return;
     const day = td.dataset.day;
     const userId = Number(td.dataset.userId);
     if (!day || !userId) return;
     if (!canEditCell(userId, day)) return;
+
+    // When in edit mode, do not toggle yes/no on clicks within the active cell.
+    if (isGridEditModeActive() && activeGridEdit?.td === td) {
+      return;
+    }
 
     const key = `${userId}:${day}`;
     const current = state.responses[key] ?? null;
@@ -150,6 +319,7 @@ const debounce = debounceByKey();
 function renderPerDateControls(state) {
   if (!perDateRoot) return;
   perDateRoot.innerHTML = "";
+  perDateEditors.clear();
 
   const myUserId = selectedUserId;
 
@@ -197,7 +367,7 @@ function renderPerDateControls(state) {
     const row2 = document.createElement("div");
     row2.className = "row";
 
-    let editorOpen = currentComment.length > 0 && currentComment !== "+1";
+    let editorOpen = ui.openCommentDays.has(day) || (currentComment.length > 0 && currentComment !== "+1");
 
     const plusOneBtn = document.createElement("button");
     plusOneBtn.type = "button";
@@ -218,6 +388,7 @@ function renderPerDateControls(state) {
     input.className = "input";
     input.placeholder = "Kommentar (valgfritt)";
     input.value = currentComment && currentComment !== "+1" ? currentComment : "";
+    input.dataset.day = day;
 
     function renderRow2() {
       row2.innerHTML = "";
@@ -232,46 +403,42 @@ function renderPerDateControls(state) {
       }
     }
 
-    addCommentBtn.addEventListener("click", () => {
-      editorOpen = true;
-      if ((state.comments?.[key] ?? "").trim() === "+1") {
-        input.value = "+1";
+    function setEditorOpen(nextOpen, { focus = false } = {}) {
+      editorOpen = nextOpen;
+      if (editorOpen) {
+        ui.openCommentDays.add(day);
+        if ((state.comments?.[key] ?? "").trim() === "+1") {
+          input.value = "+1";
+        }
+      } else {
+        ui.openCommentDays.delete(day);
       }
       renderRow2();
-      input.focus();
+      if (editorOpen && focus) {
+        input.focus();
+      }
+    }
+
+    addCommentBtn.addEventListener("click", () => {
+      setEditorOpen(true, { focus: true });
     });
 
     plusOneBtn.addEventListener("click", async () => {
       const cur = (state.comments?.[key] ?? "").trim();
       const next = cur === "+1" ? "" : "+1";
-      state.comments[key] = next;
-      editorOpen = false;
-      updateGridCellForMyDay(state, day);
-      renderRow2();
-      try {
-        await postResponse({ day, value: state.responses[key] ?? null, comment: next });
-      } catch (e) {
-        // ignore
-      }
+      setCommentForMyDay(state, day, next, { updatePerDateInput: true });
+      setEditorOpen(false);
+      await flushCommentCommitForMyDay(state, day);
     });
 
     input.addEventListener("input", () => {
-      state.comments[key] = input.value;
-      updateGridCellForMyDay(state, day);
-      debounce(key, 450, async () => {
-        try {
-          await postResponse({ day, value: state.responses[key] ?? null, comment: state.comments[key] ?? "" });
-        } catch (e) {
-          // ignore
-        }
-      });
+      setCommentForMyDay(state, day, input.value, { updatePerDateInput: false });
     });
 
     input.addEventListener("blur", () => {
       const cur = (input.value || "").trim();
       if (!cur) {
-        editorOpen = false;
-        renderRow2();
+        setEditorOpen(false);
       }
     });
 
@@ -279,6 +446,15 @@ function renderPerDateControls(state) {
     card.append(row2);
 
     perDateRoot.append(card);
+
+    perDateEditors.set(day, {
+      open: ({ focus = false } = {}) => setEditorOpen(true, { focus }),
+      close: () => setEditorOpen(false),
+      setValue: (v) => {
+        input.value = v ?? "";
+      },
+      getValue: () => input.value ?? "",
+    });
   }
 }
 
