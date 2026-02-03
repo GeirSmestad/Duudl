@@ -259,7 +259,6 @@ label {
   border: 1px solid var(--border);
   border-radius: 14px;
   overflow: hidden;
-  table-layout: fixed;
 }
 
 .gridTable th,
@@ -270,8 +269,6 @@ label {
   text-align: center;
   min-width: 44px;
   white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
   height: 40px;
 }
 
@@ -283,6 +280,11 @@ label {
   color: var(--muted);
   font-weight: 700;
   backdrop-filter: blur(8px);
+}
+
+.gridTable th:first-child,
+.gridTable td:first-child {
+  text-align: left;
 }
 
 .gridTable td:last-child,
@@ -318,10 +320,11 @@ label {
 }
 
 .gridCell--comment {
-  white-space: nowrap;
+  /* Only comment cells are cropped; headers + names should be fully visible. */
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 140px;
+  width: 160px;
+  max-width: 160px;
 }
 
 .commentTooltip {
