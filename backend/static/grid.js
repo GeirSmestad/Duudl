@@ -1,3 +1,5 @@
+import { attachHoverTooltip, isTextTruncated } from "./tooltip.js";
+
 export const VALUE_CYCLE = [null, "yes", "no", "inconvenient"];
 
 export function nextValue(current) {
@@ -100,54 +102,17 @@ export function renderGridTable({ rootEl, users, days, responses, comments, rowH
 }
 
 export function attachCommentHoverTooltip(containerEl) {
-  if (!containerEl) return () => {};
-
-  let tooltipEl = document.getElementById("commentTooltip");
-  if (!tooltipEl) {
-    tooltipEl = document.createElement("div");
-    tooltipEl.id = "commentTooltip";
-    tooltipEl.className = "commentTooltip";
-    tooltipEl.style.display = "none";
-    document.body.append(tooltipEl);
-  }
-
-  function hide() {
-    tooltipEl.style.display = "none";
-  }
-
-  function showForCell(td) {
-    if (!td || !td.classList.contains("gridCell--comment")) return hide();
-
-    // Only show when the cell is actually truncated.
-    const isTruncated = td.scrollWidth > td.clientWidth || td.scrollHeight > td.clientHeight;
-    if (!isTruncated) return hide();
-
-    const fullText = (td.textContent || "").trim();
-    if (!fullText) return hide();
-
-    tooltipEl.textContent = fullText;
-    tooltipEl.style.display = "block";
-  }
-
-  function onMouseMove(ev) {
-    const td = ev.target.closest?.("td.gridCell--comment");
-    if (!td) return hide();
-
-    showForCell(td);
-    tooltipEl.style.left = `${ev.clientX + 12}px`;
-    tooltipEl.style.top = `${ev.clientY + 12}px`;
-  }
-
-  function onMouseLeave() {
-    hide();
-  }
-
-  containerEl.addEventListener("mousemove", onMouseMove);
-  containerEl.addEventListener("mouseleave", onMouseLeave);
-
-  return () => {
-    containerEl.removeEventListener("mousemove", onMouseMove);
-    containerEl.removeEventListener("mouseleave", onMouseLeave);
-    hide();
-  };
+  // Tooltip is shown only when the visible text is actually truncated.
+  // Since we use multi-line clamping, measure truncation on the inner `.gridCell__text` element.
+  return attachHoverTooltip({
+    containerEl,
+    targetSelector: "td.gridCell--comment",
+    tooltipClassName: "commentTooltip",
+    getText: (td) => td.textContent || "",
+    shouldShow: (td) => {
+      const textEl = td.querySelector(".gridCell__text");
+      if (!textEl) return false;
+      return isTextTruncated(textEl, 2);
+    },
+  });
 }
