@@ -101,3 +101,56 @@ export function renderGridTable({ rootEl, users, days, responses, comments, rowH
   return table;
 }
 
+
+export function attachCommentHoverTooltip(containerEl) {
+  if (!containerEl) return () => {};
+
+  let tooltipEl = document.getElementById("commentTooltip");
+  if (!tooltipEl) {
+    tooltipEl = document.createElement("div");
+    tooltipEl.id = "commentTooltip";
+    tooltipEl.className = "commentTooltip";
+    tooltipEl.style.display = "none";
+    document.body.append(tooltipEl);
+  }
+
+  function hide() {
+    tooltipEl.style.display = "none";
+  }
+
+  function showForCell(td) {
+    if (!td || !td.classList.contains("gridCell--comment")) return hide();
+
+    // Only show when the cell is actually truncated.
+    const isTruncated = td.scrollWidth > td.clientWidth;
+    if (!isTruncated) return hide();
+
+    const fullText = (td.textContent || "").trim();
+    if (!fullText) return hide();
+
+    tooltipEl.textContent = fullText;
+    tooltipEl.style.display = "block";
+  }
+
+  function onMouseMove(ev) {
+    const td = ev.target.closest?.("td.gridCell--comment");
+    if (!td) return hide();
+
+    showForCell(td);
+    tooltipEl.style.left = `${ev.clientX + 12}px`;
+    tooltipEl.style.top = `${ev.clientY + 12}px`;
+  }
+
+  function onMouseLeave() {
+    hide();
+  }
+
+  containerEl.addEventListener("mousemove", onMouseMove);
+  containerEl.addEventListener("mouseleave", onMouseLeave);
+
+  return () => {
+    containerEl.removeEventListener("mousemove", onMouseMove);
+    containerEl.removeEventListener("mouseleave", onMouseLeave);
+    hide();
+  };
+}

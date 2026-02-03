@@ -1,5 +1,5 @@
 import { createMonthCalendar, formatIsoDayPretty } from "./calendar.js";
-import { nextValue, renderGridTable } from "./grid.js";
+import { attachCommentHoverTooltip, nextValue, renderGridTable } from "./grid.js";
 
 const token = window.__DUUDL_TOKEN__;
 
@@ -181,4 +181,5 @@ selected = new Set(state.days);
 updateSummary();
 renderCalendar();
 renderGrid(state);
+attachCommentHoverTooltip(gridRoot);
 

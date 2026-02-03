@@ -1,4 +1,4 @@
-import { nextValue, renderGridTable } from "./grid.js";
+import { attachCommentHoverTooltip, nextValue, renderGridTable } from "./grid.js";
 
 const token = window.__DUUDL_TOKEN__;
 const selectedUserId = window.__SELECTED_USER_ID__;
@@ -302,4 +302,5 @@ async function render(state) {
 
 const state = await fetchState();
 await render(state);
+attachCommentHoverTooltip(gridRoot);
 
