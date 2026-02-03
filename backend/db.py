@@ -95,6 +95,7 @@ def ensure_schema() -> None:
           user_id INTEGER NOT NULL,
           day TEXT NOT NULL,
           value TEXT,
+          comment TEXT NOT NULL DEFAULT '',
           UNIQUE(duudl_id, user_id, day),
           FOREIGN KEY(duudl_id) REFERENCES duudls(id) ON DELETE CASCADE,
           FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE
@@ -107,6 +108,7 @@ def ensure_schema() -> None:
     )
 
     _ensure_duudls_has_description(db)
+    _ensure_responses_has_comment(db)
     seed_users(db)
     db.commit()
 
@@ -116,6 +118,13 @@ def _ensure_duudls_has_description(db: sqlite3.Connection) -> None:
     if "description" in cols:
         return
     db.execute("ALTER TABLE duudls ADD COLUMN description TEXT NOT NULL DEFAULT ''")
+
+
+def _ensure_responses_has_comment(db: sqlite3.Connection) -> None:
+    cols = [r["name"] for r in db.execute("PRAGMA table_info(responses)").fetchall()]
+    if "comment" in cols:
+        return
+    db.execute("ALTER TABLE responses ADD COLUMN comment TEXT NOT NULL DEFAULT ''")
 
 
 def seed_users(db: sqlite3.Connection) -> None:
@@ -159,7 +168,7 @@ def list_duudls() -> list[DuudlListRow]:
           COALESCE(COUNT(DISTINCT r.user_id), 0) AS response_user_count
         FROM duudls d
         JOIN users u ON u.id = d.created_by_user_id
-        LEFT JOIN responses r ON r.duudl_id = d.id AND r.value IS NOT NULL
+        LEFT JOIN responses r ON r.duudl_id = d.id AND (r.value IS NOT NULL OR r.comment != '')
         GROUP BY d.id
         ORDER BY d.created_at DESC
         """
@@ -224,27 +233,45 @@ def list_duudl_days(duudl_id: int) -> list[str]:
     return [r["day"] for r in rows]
 
 
-def get_responses_map(duudl_id: int) -> dict[tuple[int, str], str | None]:
+def get_responses_maps(duudl_id: int) -> tuple[dict[tuple[int, str], str | None], dict[tuple[int, str], str]]:
     rows = get_db().execute(
-        "SELECT user_id, day, value FROM responses WHERE duudl_id = ?",
+        "SELECT user_id, day, value, comment FROM responses WHERE duudl_id = ?",
         (duudl_id,),
     ).fetchall()
-    out: dict[tuple[int, str], str | None] = {}
+    values: dict[tuple[int, str], str | None] = {}
+    comments: dict[tuple[int, str], str] = {}
     for r in rows:
-        out[(int(r["user_id"]), str(r["day"]))] = r["value"]
-    return out
+        key = (int(r["user_id"]), str(r["day"]))
+        values[key] = r["value"]
+        comments[key] = str(r["comment"] or "")
+    return values, comments
 
 
-def upsert_response(*, duudl_id: int, user_id: int, day: str, value: str | None) -> None:
+def upsert_response(*, duudl_id: int, user_id: int, day: str, value: str | None, comment: str | None) -> None:
     db = get_db()
-    db.execute(
-        """
-        INSERT INTO responses (duudl_id, user_id, day, value)
-        VALUES (?, ?, ?, ?)
-        ON CONFLICT(duudl_id, user_id, day) DO UPDATE SET value = excluded.value
-        """,
-        (duudl_id, user_id, day, value),
-    )
+    if comment is None:
+        # Value-only update; preserve existing comment.
+        db.execute(
+            """
+            INSERT INTO responses (duudl_id, user_id, day, value, comment)
+            VALUES (?, ?, ?, ?, '')
+            ON CONFLICT(duudl_id, user_id, day) DO UPDATE SET
+              value = excluded.value
+            """,
+            (duudl_id, user_id, day, value),
+        )
+    else:
+        comment_to_store = str(comment).strip()
+        db.execute(
+            """
+            INSERT INTO responses (duudl_id, user_id, day, value, comment)
+            VALUES (?, ?, ?, ?, ?)
+            ON CONFLICT(duudl_id, user_id, day) DO UPDATE SET
+              value = excluded.value,
+              comment = excluded.comment
+            """,
+            (duudl_id, user_id, day, value, comment_to_store),
+        )
     db.commit()
 
 
@@ -293,10 +320,11 @@ def delete_duudl(*, duudl_id: int) -> None:
 def fetch_duudl_state_json(duudl_id: int) -> dict[str, Any]:
     users = list_users()
     days = list_duudl_days(duudl_id)
-    resp = get_responses_map(duudl_id)
+    values, comments = get_responses_maps(duudl_id)
     return {
         "users": [{"id": u.id, "display_name": u.display_name} for u in users],
         "days": days,
-        "responses": {f"{user_id}:{day}": value for (user_id, day), value in resp.items()},
+        "responses": {f"{user_id}:{day}": value for (user_id, day), value in values.items()},
+        "comments": {f"{user_id}:{day}": comment for (user_id, day), comment in comments.items() if comment},
     }
 

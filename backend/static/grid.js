@@ -13,9 +13,12 @@ export function cellClassForValue(value) {
 }
 
 export function valueSymbol(value) {
-  if (value === "yes") return "✓";
-  if (value === "no") return "✕";
-  if (value === "inconvenient") return "( ✓ )";
+  return "";
+}
+
+function displayCellText({ value, comment }) {
+  const c = (comment || "").trim();
+  if (c) return c;
   return "";
 }
 
@@ -33,7 +36,7 @@ export function formatIsoDayHeader(isoDay) {
   return `${wd} ${pad2(d)}.${pad2(m)}`;
 }
 
-export function renderGridTable({ rootEl, users, days, responses, rowHighlightUserId, canEditCell }) {
+export function renderGridTable({ rootEl, users, days, responses, comments, rowHighlightUserId, canEditCell }) {
   rootEl.innerHTML = "";
 
   const table = document.createElement("table");
@@ -71,11 +74,16 @@ export function renderGridTable({ rootEl, users, days, responses, rowHighlightUs
     for (const day of days) {
       const key = `${u.id}:${day}`;
       const val = responses[key] ?? null;
+      const comment = comments?.[key] ?? "";
       const td = document.createElement("td");
       td.dataset.userId = String(u.id);
       td.dataset.day = day;
       td.className = cellClassForValue(val);
-      td.textContent = valueSymbol(val);
+      td.textContent = displayCellText({ value: val, comment });
+      if (comment) {
+        td.title = comment;
+        td.classList.add("gridCell--comment");
+      }
 
       if (!canEditCell(u.id, day)) {
         td.classList.add("gridCell--readonly");

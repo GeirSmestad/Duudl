@@ -168,6 +168,7 @@ function renderGrid(s) {
     users: s.users,
     days: s.days,
     responses: s.responses,
+    comments: s.comments,
     rowHighlightUserId: null,
     canEditCell: () => true,
   });

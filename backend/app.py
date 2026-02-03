@@ -299,11 +299,14 @@ def create_app() -> Flask:
             value = str(value)
             if value not in ("yes", "no", "inconvenient"):
                 return Response("Bad value", status=400)
+        comment = payload.get("comment", None)
+        if comment is not None:
+            comment = str(comment)
 
         if not day:
             return Response("Bad day", status=400)
 
-        upsert_response(duudl_id=duudl.id, user_id=selected_user.id, day=day, value=value)
+        upsert_response(duudl_id=duudl.id, user_id=selected_user.id, day=day, value=value, comment=comment)
         return jsonify({"ok": True})
 
     @app.post("/api/duudl/<token>/admin-response")
@@ -329,6 +332,9 @@ def create_app() -> Flask:
             value = str(value)
             if value not in ("yes", "no", "inconvenient"):
                 return Response("Bad value", status=400)
+        comment = payload.get("comment", None)
+        if comment is not None:
+            comment = str(comment)
 
         if not day:
             return Response("Bad day", status=400)
@@ -336,7 +342,7 @@ def create_app() -> Flask:
         if get_user(user_id) is None:
             return Response("Unknown user", status=400)
 
-        upsert_response(duudl_id=duudl.id, user_id=user_id, day=day, value=value)
+        upsert_response(duudl_id=duudl.id, user_id=user_id, day=day, value=value, comment=comment)
         return jsonify({"ok": True})
 
     return app

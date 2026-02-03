@@ -8,6 +8,9 @@
           <p class="p">{{ duudl.description }}</p>
         {% endif %}
         <p class="p">Trykk for å svare: ja / nei / ikke favorittdagen min</p>
+        <p class="p">
+          Du kan trykke i tabellen under, eller scrolle ned for å velge én og én dato med valgfri kommentar.
+        </p>
       </div>
       <div class="row">
         <a class="btn btn--ghost" href="{{ url_for('overview') }}">Tilbake til alle Duudlene våre</a>
@@ -25,6 +28,8 @@
     <div class="card">
       <div id="gridRoot" style="overflow:auto;"></div>
     </div>
+
+    <div id="perDateRoot" class="stack"></div>
   </div>
 
   <script type="module">
