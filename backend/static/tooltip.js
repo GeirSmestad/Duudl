@@ -6,6 +6,8 @@ export function attachHoverTooltip({
   shouldShow,
   offsetX = 12,
   offsetY = 12,
+  viewportPadding = 12,
+  minWidth = 260,
 }) {
   if (!containerEl) return () => {};
 
@@ -21,6 +23,16 @@ export function attachHoverTooltip({
     tooltipEl.style.display = "none";
   }
 
+  function clamp(v, lo, hi) {
+    return Math.max(lo, Math.min(hi, v));
+  }
+
+  function clampTooltipX(x) {
+    // Keep a healthy right margin so the tooltip doesn't shrink-to-fit into a skinny column.
+    const maxX = window.innerWidth - viewportPadding - Math.min(minWidth, window.innerWidth - 2 * viewportPadding);
+    return clamp(x, viewportPadding, Math.max(viewportPadding, maxX));
+  }
+
   function onMouseMove(ev) {
     const el = ev.target.closest?.(targetSelector);
     if (!el) return hide();
@@ -32,8 +44,10 @@ export function attachHoverTooltip({
 
     tooltipEl.textContent = text;
     tooltipEl.style.display = "block";
-    tooltipEl.style.left = `${ev.clientX + offsetX}px`;
-    tooltipEl.style.top = `${ev.clientY + offsetY}px`;
+    const x = clampTooltipX(ev.clientX + offsetX);
+    const y = clamp(ev.clientY + offsetY, viewportPadding, window.innerHeight - viewportPadding);
+    tooltipEl.style.left = `${x}px`;
+    tooltipEl.style.top = `${y}px`;
   }
 
   function onMouseLeave() {
@@ -122,6 +136,11 @@ export function createPinnedTooltip({ id, className }) {
     return Math.max(lo, Math.min(hi, v));
   }
 
+  function clampTooltipX(x, viewportPadding = 12, minWidth = 260) {
+    const maxX = window.innerWidth - viewportPadding - Math.min(minWidth, window.innerWidth - 2 * viewportPadding);
+    return clamp(x, viewportPadding, Math.max(viewportPadding, maxX));
+  }
+
   function showNearElement({ anchorEl, text, prefer = "below" }) {
     const t = (text || "").trim();
     if (!anchorEl || !t) return hide();
@@ -145,7 +164,7 @@ export function createPinnedTooltip({ id, className }) {
       y = rect.bottom + 8;
     }
 
-    x = clamp(x, pad, window.innerWidth - tipRect.width - pad);
+    x = clampTooltipX(x, pad, 260);
     y = clamp(y, pad, window.innerHeight - tipRect.height - pad);
 
     tooltipEl.style.left = `${x}px`;
