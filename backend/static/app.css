@@ -265,10 +265,11 @@ label {
 
 .gridTable {
   width: 100%;
-  border-collapse: collapse;
+  border-collapse: separate;
+  border-spacing: 0;
   border: 1px solid var(--border);
   border-radius: 14px;
-  overflow: hidden;
+  overflow: visible;
   table-layout: fixed;
 }
 
@@ -284,6 +285,7 @@ label {
 }
 
 .gridTable th {
+  position: -webkit-sticky;
   position: sticky;
   top: 0;
   z-index: 2;
@@ -309,6 +311,7 @@ label {
 
 /* Keep the name column visible when horizontally scrolling wide tables. */
 .gridTable th:first-child {
+  position: -webkit-sticky;
   position: sticky;
   left: 0;
   z-index: 5; /* above other headers */
@@ -317,6 +320,7 @@ label {
 }
 
 .gridTable td:first-child {
+  position: -webkit-sticky;
   position: sticky;
   left: 0;
   z-index: 3; /* above other body cells */
