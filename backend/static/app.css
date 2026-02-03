@@ -320,6 +320,8 @@ label {
   border-radius: 12px;
   overflow: hidden;
   background: rgba(231, 238, 252, 0.04);
+  width: fit-content;
+  justify-self: start;
 }
 
 .segmented__btn {

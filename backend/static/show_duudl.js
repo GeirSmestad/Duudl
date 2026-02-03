@@ -104,7 +104,14 @@ function createSegmentedChoice({ label, options, value, onChange }) {
     btn.className = `segmented__btn ${opt.className || ""}`.trim();
     btn.textContent = opt.label;
     if (opt.value === value) btn.classList.add("segmented__btn--active");
-    btn.addEventListener("click", () => onChange(opt.value));
+    btn.addEventListener("click", () => {
+      // Clicking the already-selected option clears the selection (blank).
+      if (opt.value === value) {
+        onChange(null);
+      } else {
+        onChange(opt.value);
+      }
+    });
     root.append(btn);
   }
 
@@ -167,7 +174,6 @@ function renderPerDateControls(state) {
         { value: "yes", label: "Ja", className: "segmented__btn--yes" },
         { value: "no", label: "Nei", className: "segmented__btn--no" },
         { value: "inconvenient", label: "Muligens", className: "segmented__btn--inconvenient" },
-        { value: null, label: "Blank", className: "" },
       ],
       value: currentValue,
       onChange: async (v) => {
