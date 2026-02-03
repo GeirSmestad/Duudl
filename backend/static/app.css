@@ -74,6 +74,7 @@ a {
   border: 1px solid var(--border);
   border-radius: 14px;
   padding: 16px;
+  min-width: 0;
   box-shadow: 0 18px 60px rgba(0, 0, 0, 0.25);
 }
 
@@ -98,6 +99,13 @@ a {
 .stack {
   display: grid;
   gap: 12px;
+  min-width: 0;
+}
+
+#gridRoot {
+  max-width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .btn {
@@ -285,6 +293,28 @@ label {
 .gridTable th:first-child,
 .gridTable td:first-child {
   text-align: left;
+}
+
+/* Keep the name column visible when horizontally scrolling wide tables. */
+.gridTable th:first-child {
+  position: sticky;
+  left: 0;
+  z-index: 4; /* above other headers */
+  background: rgba(17, 26, 46, 0.98);
+  box-shadow: 8px 0 14px rgba(0, 0, 0, 0.22);
+}
+
+.gridTable td:first-child {
+  position: sticky;
+  left: 0;
+  z-index: 1; /* above other body cells */
+  background: rgba(17, 26, 46, 0.96);
+  box-shadow: 8px 0 14px rgba(0, 0, 0, 0.18);
+}
+
+/* Preserve a hint of the \"my row\" highlight in the sticky name column. */
+.gridRow--me td:first-child {
+  background: rgba(110, 240, 183, 0.12);
 }
 
 .gridTable td:last-child,
