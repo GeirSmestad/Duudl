@@ -1,4 +1,4 @@
-import { formatIsoDayHeader, nextValue, renderGridTable } from "./grid.js";
+import { nextValue, renderGridTable } from "./grid.js";
 
 const token = window.__DUUDL_TOKEN__;
 const selectedUserId = window.__SELECTED_USER_ID__;
@@ -22,6 +22,19 @@ function updateGridCellForMyDay(state, day) {
   } else {
     cell.removeAttribute("title");
   }
+}
+
+const FULL_WEEKDAYS = ["Søndag", "Mandag", "Tirsdag", "Onsdag", "Torsdag", "Fredag", "Lørdag"]; // 0=Sun..6=Sat
+
+function pad2(n) {
+  return String(n).padStart(2, "0");
+}
+
+function formatIsoDayDetailed(isoDay) {
+  const [y, m, d] = String(isoDay).split("-").map((x) => Number(x));
+  const dt = new Date(y, (m || 1) - 1, d || 1);
+  const wd = FULL_WEEKDAYS[dt.getDay()] ?? "";
+  return `${wd} ${pad2(d)}.${pad2(m)}`;
 }
 
 function showCopyStatus(text) {
@@ -163,7 +176,7 @@ function renderPerDateControls(state) {
     dayTitle.className = "h1";
     dayTitle.style.fontSize = "16px";
     dayTitle.style.margin = "0";
-    dayTitle.textContent = formatIsoDayHeader(day);
+    dayTitle.textContent = formatIsoDayDetailed(day);
 
     header.append(dayTitle);
     card.append(header);

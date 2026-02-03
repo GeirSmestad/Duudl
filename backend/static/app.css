@@ -254,6 +254,7 @@ label {
   border: 1px solid var(--border);
   border-radius: 14px;
   overflow: hidden;
+  table-layout: fixed;
 }
 
 .gridTable th,
@@ -263,6 +264,10 @@ label {
   padding: 8px;
   text-align: center;
   min-width: 44px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  height: 40px;
 }
 
 .gridTable th {
