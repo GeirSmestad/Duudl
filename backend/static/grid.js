@@ -12,10 +12,6 @@ export function cellClassForValue(value) {
   return "gridCell";
 }
 
-export function valueSymbol(value) {
-  return "";
-}
-
 function displayCellText({ value, comment }) {
   const c = (comment || "").trim();
   if (c) return c;
