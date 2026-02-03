@@ -24,8 +24,8 @@ function displayCellText({ value, comment }) {
 
 const WEEKDAYS = ["Søn", "Man", "Tir", "Ons", "Tor", "Fre", "Lør"]; // JS: 0=Sun..6=Sat
 
-function pad2(n) {
-  return String(n).padStart(2, "0");
+function noPad(n) {
+  return String(n);
 }
 
 export function formatIsoDayHeader(isoDay) {
@@ -33,7 +33,7 @@ export function formatIsoDayHeader(isoDay) {
   const [y, m, d] = String(isoDay).split("-").map((x) => Number(x));
   const dt = new Date(y, (m || 1) - 1, d || 1);
   const wd = WEEKDAYS[dt.getDay()] ?? "";
-  return `${wd} ${pad2(d)}.${pad2(m)}`;
+  return `${wd} ${noPad(d)}.${noPad(m)}`;
 }
 
 export function renderGridTable({ rootEl, users, days, responses, comments, rowHighlightUserId, canEditCell }) {
@@ -100,7 +100,6 @@ export function renderGridTable({ rootEl, users, days, responses, comments, rowH
 
   return table;
 }
-
 
 export function attachCommentHoverTooltip(containerEl) {
   if (!containerEl) return () => {};

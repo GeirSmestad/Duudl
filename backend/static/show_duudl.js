@@ -26,15 +26,15 @@ function updateGridCellForMyDay(state, day) {
 
 const FULL_WEEKDAYS = ["Søndag", "Mandag", "Tirsdag", "Onsdag", "Torsdag", "Fredag", "Lørdag"]; // 0=Sun..6=Sat
 
-function pad2(n) {
-  return String(n).padStart(2, "0");
+function noPad(n) {
+  return String(n);
 }
 
 function formatIsoDayDetailed(isoDay) {
   const [y, m, d] = String(isoDay).split("-").map((x) => Number(x));
   const dt = new Date(y, (m || 1) - 1, d || 1);
   const wd = FULL_WEEKDAYS[dt.getDay()] ?? "";
-  return `${wd} ${pad2(d)}.${pad2(m)}`;
+  return `${wd} ${noPad(d)}.${noPad(m)}`;
 }
 
 function showCopyStatus(text) {
@@ -210,7 +210,10 @@ function renderPerDateControls(state) {
     plusOneBtn.type = "button";
     plusOneBtn.className = "btn btn--ghost";
     plusOneBtn.textContent = "Min +1 kan komme";
-    if (currentComment === "+1") plusOneBtn.classList.add("btn--primary");
+    if (currentComment === "+1") {
+      plusOneBtn.classList.remove("btn--ghost");
+      plusOneBtn.classList.add("btn--ok");
+    }
 
     const addCommentBtn = document.createElement("button");
     addCommentBtn.type = "button";
@@ -226,7 +229,8 @@ function renderPerDateControls(state) {
     function renderRow2() {
       row2.innerHTML = "";
       const commentIsPlusOne = (state.comments?.[key] ?? "").trim() === "+1";
-      plusOneBtn.classList.toggle("btn--primary", commentIsPlusOne);
+      plusOneBtn.classList.toggle("btn--ok", commentIsPlusOne);
+      plusOneBtn.classList.toggle("btn--ghost", !commentIsPlusOne);
 
       if (editorOpen) {
         row2.append(input);

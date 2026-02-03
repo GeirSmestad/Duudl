@@ -119,6 +119,11 @@ a {
   border-color: rgba(122, 162, 255, 0.42);
 }
 
+.btn--ok {
+  background: rgba(0, 220, 140, 0.28);
+  border-color: rgba(0, 220, 140, 0.55);
+}
+
 .btn--danger {
   background: rgba(255, 107, 107, 0.18);
   border-color: rgba(255, 107, 107, 0.42);
