@@ -428,6 +428,10 @@ label {
   outline: none;
 }
 
+.gridInlineEditor:focus-visible {
+  box-shadow: 0 0 0 2px rgba(122, 162, 255, 0.35);
+}
+
 .gridCell--editMode .gridCell__text {
   visibility: hidden;
 }
@@ -440,6 +444,13 @@ label {
   /* Desktop-only affordance: show pencil on hover for editable cells. */
   td.gridCell:not(.gridCell--readonly):hover .gridCell__editBtn {
     display: inline-flex;
+  }
+}
+
+@media (hover: none) and (pointer: coarse) {
+  /* iOS Safari auto-zooms focused inputs below 16px font-size. */
+  .gridInlineEditor {
+    font-size: 16px;
   }
 }
 

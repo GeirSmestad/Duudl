@@ -10,6 +10,8 @@ const copyStatus = document.getElementById("copyStatus");
 
 const INLINE_COMMENT_EDIT_MEDIA = "(hover: hover) and (pointer: fine)";
 const inlineCommentEditEnabled = window.matchMedia?.(INLINE_COMMENT_EDIT_MEDIA)?.matches ?? false;
+const MOBILE_INLINE_COMMENT_EDIT_MEDIA = "(hover: none) and (pointer: coarse)";
+const mobileInlineCommentEditEnabled = window.matchMedia?.(MOBILE_INLINE_COMMENT_EDIT_MEDIA)?.matches ?? false;
 
 // UI-only state (not persisted).
 const ui = {
@@ -22,6 +24,8 @@ const perDateEditors = new Map();
 let activeGridEdit = null; // { td, day }
 let gridInlineEditor = null;
 let inlineEditDocListenerAttached = false;
+let mobileTouchMoveBlockerAttached = false;
+let blockMobileScrollDuringPress = false;
 
 function updateGridCellForMyDay(state, day) {
   const cell = gridRoot?.querySelector(`td[data-user-id="${selectedUserId}"][data-day="${day}"]`);
@@ -131,6 +135,16 @@ function isGridEditModeActive() {
   return Boolean(activeGridEdit?.td);
 }
 
+function focusGridInlineEditorToEnd() {
+  if (!gridInlineEditor) return;
+  gridInlineEditor.focus();
+  try {
+    gridInlineEditor.setSelectionRange(gridInlineEditor.value.length, gridInlineEditor.value.length);
+  } catch (e) {
+    // ignore
+  }
+}
+
 function exitGridEditMode({ flush = true } = {}) {
   if (!activeGridEdit?.td) return;
   const { td, day } = activeGridEdit;
@@ -147,8 +161,8 @@ function exitGridEditMode({ flush = true } = {}) {
   }
 }
 
-function enterGridEditMode({ td, day, state }) {
-  if (!inlineCommentEditEnabled) return;
+function enterGridEditMode({ td, day, state, focus = true }) {
+  if (!inlineCommentEditEnabled && !mobileInlineCommentEditEnabled) return;
   if (!td || !day) return;
   const userId = Number(td.dataset.userId);
   if (!userId || !canEditCell(userId, day)) return;
@@ -194,10 +208,26 @@ function enterGridEditMode({ td, day, state }) {
       "pointerdown",
       (ev) => {
         if (!activeGridEdit?.td) return;
-        const inside = ev.target instanceof Node ? activeGridEdit.td.contains(ev.target) : false;
-        if (!inside) {
-          exitGridEditMode({ flush: true });
+        const targetNode = ev.target instanceof Node ? ev.target : null;
+
+        if (mobileInlineCommentEditEnabled) {
+          const insideGrid = targetNode ? gridRoot?.contains(targetNode) : false;
+          if (!insideGrid) {
+            exitGridEditMode({ flush: true });
+            return;
+          }
+
+          // While editing on mobile, do not allow taps inside the grid to toggle availability.
+          const insideEditor = targetNode ? gridInlineEditor?.contains(targetNode) : false;
+          if (!insideEditor) {
+            ev.preventDefault();
+            ev.stopPropagation();
+          }
+          return;
         }
+
+        const insideCell = targetNode ? activeGridEdit.td.contains(targetNode) : false;
+        if (!insideCell) exitGridEditMode({ flush: true });
       },
       { capture: true },
     );
@@ -214,16 +244,104 @@ function enterGridEditMode({ td, day, state }) {
   openPerDateCommentEditor(day, { focus: false });
   perDateEditors.get(day)?.setValue(gridInlineEditor.value);
 
-  gridInlineEditor.focus();
-  try {
-    gridInlineEditor.setSelectionRange(gridInlineEditor.value.length, gridInlineEditor.value.length);
-  } catch (e) {
-    // ignore
-  }
+  if (focus) focusGridInlineEditorToEnd();
 }
 
 function attachHandlers(tableEl, state) {
+  if (mobileInlineCommentEditEnabled) {
+    if (!mobileTouchMoveBlockerAttached) {
+      mobileTouchMoveBlockerAttached = true;
+      document.addEventListener(
+        "touchmove",
+        (e) => {
+          if (blockMobileScrollDuringPress) e.preventDefault();
+        },
+        { passive: false, capture: true },
+      );
+    }
+
+    // Long-press on your own cell enters comment edit mode (mobile only).
+    const LONG_PRESS_MS = 520;
+    const MOVE_CANCEL_PX = 10;
+
+    let pressTimer = null;
+    let pressPointerId = null;
+    let pressStartX = 0;
+    let pressStartY = 0;
+    let pressTd = null;
+    let pressDay = null;
+    let pressDidEnterEdit = false;
+
+    function clearPress() {
+      if (pressTimer) window.clearTimeout(pressTimer);
+      pressTimer = null;
+      pressPointerId = null;
+      pressStartX = 0;
+      pressStartY = 0;
+      pressTd = null;
+      pressDay = null;
+      pressDidEnterEdit = false;
+      blockMobileScrollDuringPress = false;
+    }
+
+    tableEl.addEventListener("pointerdown", (ev) => {
+      if (ev.pointerType !== "touch") return;
+      if (isGridEditModeActive()) return;
+
+      const td = ev.target.closest("td");
+      if (!td) return;
+      const day = td.dataset.day;
+      const userId = Number(td.dataset.userId);
+      if (!day || !userId) return;
+      if (!canEditCell(userId, day)) return;
+
+      pressPointerId = ev.pointerId;
+      pressStartX = ev.clientX;
+      pressStartY = ev.clientY;
+      pressTd = td;
+      pressDay = day;
+
+      pressTimer = window.setTimeout(() => {
+        pressTimer = null;
+        pressDidEnterEdit = true;
+        blockMobileScrollDuringPress = true;
+        // Do NOT focus until the finger is released; focusing during a press can cause iOS to scroll/zoom weirdly.
+        enterGridEditMode({ td: pressTd, day: pressDay, state, focus: false });
+      }, LONG_PRESS_MS);
+    });
+
+    tableEl.addEventListener("pointermove", (ev) => {
+      if (!pressTimer) return;
+      if (pressPointerId !== ev.pointerId) return;
+      const dx = ev.clientX - pressStartX;
+      const dy = ev.clientY - pressStartY;
+      if (Math.hypot(dx, dy) > MOVE_CANCEL_PX) {
+        clearPress();
+      }
+    });
+
+    tableEl.addEventListener("pointerup", (ev) => {
+      if (pressPointerId !== ev.pointerId) return;
+      if (pressDidEnterEdit) {
+        blockMobileScrollDuringPress = false;
+        focusGridInlineEditorToEnd();
+      }
+      clearPress();
+    });
+
+    tableEl.addEventListener("pointercancel", (ev) => {
+      if (pressPointerId !== ev.pointerId) return;
+      clearPress();
+    });
+  }
+
   tableEl.addEventListener("click", async (ev) => {
+    // While editing a comment on mobile, ignore grid clicks entirely.
+    // Exiting edit mode is done by tapping outside the grid.
+    if (mobileInlineCommentEditEnabled && isGridEditModeActive()) {
+      return;
+    }
+
     if (ev.target.closest(".gridCell__editBtn")) {
       if (!inlineCommentEditEnabled) return;
       const td = ev.target.closest("td");
