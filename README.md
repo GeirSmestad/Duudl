@@ -2,6 +2,11 @@
 
 This is an off-brand clone of a popular meetup scheduling service.
 
+## TODO
+
+- [ ] Replace full names with initials on narrow screens (or on mobile in general)
+- [ ] Narrower margins for the most narrow screen sizes
+
 ## How to run the app
 
 ```bash
