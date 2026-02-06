@@ -303,8 +303,8 @@ function attachHandlers(tableEl, state) {
     }
 
     // Long-press on your own cell enters comment edit mode (mobile only).
-    const LONG_PRESS_MS = 520;
-    const MOVE_CANCEL_PX = 10;
+    const LONG_PRESS_MS = 420;
+    const MOVE_CANCEL_PX = 24;
 
     let pressTimer = null;
     let pressPointerId = null;
@@ -325,6 +325,18 @@ function attachHandlers(tableEl, state) {
       pressDidEnterEdit = false;
       blockMobileScrollDuringPress = false;
     }
+
+    // Prevent native long-press context menu from cancelling our pointer stream
+    // while we are waiting for the long-press timer.
+    tableEl.addEventListener(
+      "contextmenu",
+      (ev) => {
+        if (!pressTimer) return;
+        ev.preventDefault();
+        ev.stopPropagation();
+      },
+      { capture: true },
+    );
 
     tableEl.addEventListener("pointerdown", (ev) => {
       if (ev.pointerType !== "touch") return;
