@@ -13,6 +13,48 @@ const inlineCommentEditEnabled = window.matchMedia?.(INLINE_COMMENT_EDIT_MEDIA)?
 const MOBILE_INLINE_COMMENT_EDIT_MEDIA = "(hover: none) and (pointer: coarse)";
 const mobileInlineCommentEditEnabled = window.matchMedia?.(MOBILE_INLINE_COMMENT_EDIT_MEDIA)?.matches ?? false;
 
+function isIOS() {
+  const ua = navigator.userAgent || "";
+  // iPadOS often reports as Mac, but with touch points.
+  if (/iPad|iPhone|iPod/.test(ua)) return true;
+  return navigator.platform === "MacIntel" && (navigator.maxTouchPoints || 0) > 1;
+}
+
+function viewportBaseContent() {
+  const meta = document.querySelector('meta[name="viewport"]');
+  const raw = meta?.getAttribute("content") || "";
+  if (!raw) return "";
+  const parts = raw
+    .split(",")
+    .map((p) => p.trim())
+    .filter(Boolean)
+    .filter((p) => !p.startsWith("maximum-scale=") && !p.startsWith("minimum-scale=") && p !== "user-scalable=no");
+  return parts.join(", ");
+}
+
+function lockIOSViewportScaleTo1() {
+  // This is the only truly deterministic fix for iOS Safari's non-deterministic
+  // zoom level after orientation changes on complex pages (sticky headers + scroll containers).
+  //
+  // In theory this should disable pinch-zoom on iOS, but in practice it does not.
+  if (!isIOS() || !mobileInlineCommentEditEnabled) return;
+  const meta = document.querySelector('meta[name="viewport"]');
+  if (!meta) return;
+
+  const base = viewportBaseContent();
+  if (!base) return;
+
+  meta.setAttribute("content", `${base}, minimum-scale=1, maximum-scale=1`);
+}
+
+if (isIOS() && mobileInlineCommentEditEnabled) {
+  lockIOSViewportScaleTo1();
+  window.addEventListener("orientationchange", () => {
+    // Re-apply after Safari relayout.
+    window.setTimeout(lockIOSViewportScaleTo1, 350);
+  });
+}
+
 // UI-only state (not persisted).
 const ui = {
   openCommentDays: new Set(),
